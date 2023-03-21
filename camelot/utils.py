@@ -845,6 +845,7 @@ def get_page_layout(
     boxes_flow=0.5,
     detect_vertical=True,
     all_texts=True,
+    get_all_pages=False,
 ):
     """Returns a PDFMiner LTPage object and page dimension of a single
     page pdf. To get the definitions of kwargs, see
@@ -861,15 +862,26 @@ def get_page_layout(
     boxes_flow : float
     detect_vertical : bool
     all_texts : bool
+    get_all_pages : bool, default False
+        if False, returns layout and dim of the last page of the pdf,
+        otherwise, returns layouts and dims of all pages.
 
     Returns
     -------
-    layout : object
-        PDFMiner LTPage object.
-    dim : tuple
-        Dimension of pdf page in the form (width, height).
-
+    if `get_all_pages` is True,
+        layouts : List[object]
+            object: PDFMiner LTPage object.
+        dims : List[tuple]
+            Each tuple: dimension of pdf page in the form (width, height).
+    otherwise,
+        layout : object
+            PDFMiner LTPage object.
+        dim : tuple
+            Dimension of pdf page in the form (width, height).
     """
+    layouts = []
+    dims = []
+    
     with open(filename, "rb") as f:
         parser = PDFParser(f)
         document = PDFDocument(parser)
@@ -895,6 +907,13 @@ def get_page_layout(
             width = layout.bbox[2]
             height = layout.bbox[3]
             dim = (width, height)
+            
+            layouts.append(layout)
+            dims.append(dim)
+
+        if get_all_pages:
+            return layouts, dims
+        
         return layout, dim
 
 
